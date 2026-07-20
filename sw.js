@@ -1,11 +1,12 @@
 'use strict';
 
-const CACHE_NAME = 'trava-letra-v1';
+const CACHE_NAME = 'trava-letra-v2';
 const ASSETS = [
     './',
     './index.html',
     './help.html',
     './manifest.webmanifest',
+    './icons/icon-192.png',
     './icons/icon-512.png',
     './font/LOVE-YOU.woff2',
     './font/LOVE-YOU.woff',
