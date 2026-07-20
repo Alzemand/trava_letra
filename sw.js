@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_NAME = 'trava-letra-v2';
+const CACHE_NAME = 'trava-letra-v3';
 const ASSETS = [
     './',
     './index.html',
