@@ -1,0 +1,26 @@
+{
+    "name": "Trava Letra",
+    "short_name": "Trava Letra",
+    "description": "O jogo de palavras para jogar com os amigos: fale uma palavra do tema e trave a letra antes que o tempo acabe!",
+    "lang": "pt-BR",
+    "start_url": "./index.html",
+    "scope": "./",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#4d2fb5",
+    "theme_color": "#4d2fb5",
+    "icons": [
+        {
+            "src": "icons/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "icons/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+}

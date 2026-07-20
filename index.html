@@ -3,32 +3,18 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRAVA LETRA</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#4d2fb5">
+    <meta name="description" content="Trava Letra — o jogo de palavras para jogar com os amigos. Fale uma palavra do tema e trave a letra antes que o tempo acabe!">
+    <title>Trava Letra</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="icons/icon-512.png" type="image/png">
+    <link rel="apple-touch-icon" href="icons/icon-512.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Trava Letra">
 
     <style>
-        .menu-container,
-        .theme-container,
-        .game-container {
-            display: none;
-            text-align: center;
-        }
-
-        .menu-container.active,
-        .theme-container.active,
-        .game-container.active {
-            display: block;
-        }
-
-        .letter-button {
-            width: 80px;
-            height: 80px;
-            margin: 5px;
-            font-size: 25px;
-        }
-
         @font-face {
             font-family: 'LOVE-YOU';
             src: url('font/LOVE-YOU.woff2') format('woff2'),
@@ -38,255 +24,794 @@
             font-display: swap;
         }
 
-        @media (min-width: 992px) {
-            .letter-button {
-            width: 100px;
-            height: 100px;
-            }
+        :root {
+            --bg1: #4d2fb5;
+            --bg2: #7b2ff7;
+            --accent: #ffcf3f;
+            --accent-dark: #e0a800;
+            --card: #ffffff;
+            --ink: #2b2350;
+            --ok: #2ecc71;
+            --warn: #f1c40f;
+            --danger: #e74c3c;
+            --radius: 18px;
         }
 
-        .modal-body {
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            color: var(--ink);
+            background: linear-gradient(160deg, var(--bg1) 0%, var(--bg2) 60%, #b04ef0 100%);
+            background-attachment: fixed;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .screen { display: none; width: 100%; max-width: 720px; text-align: center; }
+        .screen.active { display: block; animation: fadeIn .35s ease; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: none; }
+        }
+
+        /* ---------- Menu ---------- */
+        .title {
+            font-family: 'LOVE-YOU', cursive;
+            font-size: clamp(64px, 18vw, 120px);
+            line-height: .85;
+            color: #fff;
+            margin: 0;
+            text-shadow: 0 6px 0 rgba(0, 0, 0, .18);
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, .85);
+            margin: 14px 0 30px;
+            font-size: 17px;
+        }
+
+        .btn {
+            display: inline-block;
+            border: none;
+            cursor: pointer;
+            font-size: 19px;
+            font-weight: 700;
+            padding: 14px 34px;
+            border-radius: 999px;
+            margin: 6px;
+            color: var(--ink);
+            background: var(--accent);
+            box-shadow: 0 5px 0 var(--accent-dark), 0 10px 18px rgba(0, 0, 0, .25);
+            transition: transform .08s ease, box-shadow .08s ease, filter .15s;
+            text-decoration: none;
+        }
+
+        .btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 var(--accent-dark), 0 4px 8px rgba(0, 0, 0, .25);
+        }
+
+        .btn.secondary {
+            background: rgba(255, 255, 255, .16);
+            color: #fff;
+            box-shadow: 0 5px 0 rgba(0, 0, 0, .25), 0 10px 18px rgba(0, 0, 0, .18);
+            backdrop-filter: blur(4px);
+        }
+
+        .btn.secondary:active { box-shadow: 0 1px 0 rgba(0, 0, 0, .25); }
+
+        .btn.small { font-size: 15px; padding: 10px 22px; }
+
+        .menu-buttons { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+
+        /* ---------- Jogo ---------- */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .icon-btn {
+            background: rgba(255, 255, 255, .16);
+            border: none;
+            color: #fff;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
             font-size: 20px;
-        }	
-
-        .timer-bar {
-            height: 20px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: none;
         }
+
+        .icon-btn:active { transform: scale(.92); }
+
+        .round-badge {
+            background: rgba(0, 0, 0, .25);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 999px;
+            white-space: nowrap;
+        }
+
+        #game-theme {
+            color: #fff;
+            font-size: clamp(24px, 6vw, 40px);
+            font-weight: 800;
+            margin: 6px 0 4px;
+            text-shadow: 0 3px 0 rgba(0, 0, 0, .2);
+            overflow-wrap: anywhere;
+        }
+
+        .word-count {
+            color: rgba(255, 255, 255, .85);
+            font-size: 15px;
+            margin-bottom: 14px;
+        }
+
+        .timer-track {
+            width: 100%;
+            height: 22px;
+            background: rgba(0, 0, 0, .3);
+            border-radius: 999px;
+            overflow: hidden;
+            margin-bottom: 6px;
+        }
+
+        #timer-bar {
+            height: 100%;
+            width: 100%;
+            border-radius: 999px;
+            background: var(--ok);
+            transition: width .1s linear, background-color .3s;
+        }
+
+        #timer-bar.warn { background: var(--warn); }
+        #timer-bar.danger { background: var(--danger); animation: pulse .5s infinite alternate; }
+
+        @keyframes pulse {
+            from { filter: brightness(1); }
+            to { filter: brightness(1.5); }
+        }
+
+        #timer-label {
+            color: rgba(255, 255, 255, .9);
+            font-variant-numeric: tabular-nums;
+            font-weight: 700;
+            font-size: 15px;
+            margin-bottom: 14px;
+        }
+
+        #letters {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .letter-button {
+            width: clamp(56px, 16vw, 92px);
+            height: clamp(56px, 16vw, 92px);
+            font-size: clamp(24px, 7vw, 38px);
+            font-weight: 800;
+            font-family: inherit;
+            color: var(--ink);
+            background: var(--card);
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            box-shadow: 0 5px 0 rgba(0, 0, 0, .28);
+            transition: transform .07s, box-shadow .07s, opacity .25s, background .25s;
+        }
+
+        .letter-button:active:not(:disabled) {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 rgba(0, 0, 0, .28);
+        }
+
+        .letter-button:disabled {
+            background: rgba(255, 255, 255, .12);
+            color: rgba(255, 255, 255, .35);
+            box-shadow: none;
+            cursor: default;
+            transform: scale(.94);
+        }
+
+        /* ---------- Modais ---------- */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(20, 10, 50, .65);
+            backdrop-filter: blur(3px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 50;
+        }
+
+        .overlay.open { display: flex; animation: fadeIn .2s ease; }
+
+        .dialog {
+            background: var(--card);
+            color: var(--ink);
+            border-radius: 22px;
+            padding: 26px 22px;
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, .4);
+            animation: pop .25s ease;
+        }
+
+        @keyframes pop {
+            from { transform: scale(.85); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .dialog h2 { margin: 0 0 8px; font-size: 24px; }
+        .dialog .big-theme {
+            font-size: clamp(24px, 7vw, 34px);
+            font-weight: 800;
+            color: var(--bg1);
+            margin: 14px 0 18px;
+            overflow-wrap: anywhere;
+        }
+        .dialog p { font-size: 17px; line-height: 1.45; margin: 10px 0 18px; }
+        .dialog .actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+        .dialog .btn { box-shadow: 0 4px 0 var(--accent-dark); }
+        .dialog .btn.outline {
+            background: #fff;
+            color: var(--bg1);
+            box-shadow: inset 0 0 0 2px var(--bg1);
+        }
+        .dialog .btn.outline:active { transform: translateY(2px); }
+        .dialog.eliminated h2 { color: var(--danger); font-size: 30px; }
+
+        /* ---------- Configurações ---------- */
+        .settings-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 4px;
+            border-bottom: 1px solid #eee;
+            font-size: 16px;
+            text-align: left;
+        }
+
+        .settings-row:last-of-type { border-bottom: none; }
+
+        .seg {
+            display: inline-flex;
+            background: #efecfa;
+            border-radius: 999px;
+            padding: 3px;
+            flex: none;
+        }
+
+        .seg button {
+            border: none;
+            background: transparent;
+            padding: 7px 13px;
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--ink);
+            cursor: pointer;
+        }
+
+        .seg button.sel { background: var(--bg1); color: #fff; }
+
+        .switch { position: relative; width: 52px; height: 30px; flex: none; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .switch .slider {
+            position: absolute; inset: 0;
+            background: #ccc; border-radius: 999px;
+            transition: .2s; cursor: pointer;
+        }
+        .switch .slider::before {
+            content: ""; position: absolute;
+            width: 24px; height: 24px; left: 3px; top: 3px;
+            background: #fff; border-radius: 50%;
+            transition: .2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,.25);
+        }
+        .switch input:checked + .slider { background: var(--bg1); }
+        .switch input:checked + .slider::before { transform: translateX(22px); }
+
+        #install-btn { display: none; }
     </style>
 </head>
 
-<div class="modal fade" id="timeoutModal" tabindex="-1" aria-labelledby="timeoutModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="timeoutModalLabel">Tempo Esgotado</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <br>
-                <div class="modal-body text-center">
-                    <b><span id="timeoutText">O jogador da vez foi eliminado!</span></b> 
-                </div>
-            <br>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary me-auto" onclick="selectTheme()" data-bs-dismiss="modal">Novo Tema</button>
-                <button id="bntContinuar" type="button" class="btn btn-primary md-auto" data-bs-dismiss="modal">Continuar</button>
-            </div>
+<body>
+    <!-- ===== Menu ===== -->
+    <div id="menu-screen" class="screen active">
+        <h1 class="title">TRAVA</h1>
+        <h1 class="title">LETRA</h1>
+        <p class="subtitle">Fale uma palavra do tema e trave a letra antes que o tempo acabe!</p>
+        <div class="menu-buttons">
+            <button class="btn" onclick="drawTheme()">🎮 Jogar</button>
+            <a href="help.html" class="btn secondary">📖 Como Jogar</a>
+            <button class="btn secondary" onclick="openSettings()">⚙️ Opções</button>
+            <button id="install-btn" class="btn secondary small">📲 Instalar no celular</button>
         </div>
     </div>
-</div>
 
-<div class="modal fade" id="gerarTema" tabindex="-1" aria-labelledby="gerarTemaLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="gerarTemaLabel">Tema Gerado</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <br>
-                <div class="modal-body text-center">
-                   <b><span id="temaGeradoText"></span></b> 
-                </div>
-            <br>
-            <div class="modal-footer">
-                <button id="bntContinuar" type="button" class="btn btn-primary md-auto" onclick="startGame()" data-bs-dismiss="modal">Continuar</button>
-            </div>
+    <!-- ===== Jogo ===== -->
+    <div id="game-screen" class="screen">
+        <div class="topbar">
+            <button class="icon-btn" onclick="backToMenu()" aria-label="Voltar ao menu">←</button>
+            <span id="round-badge" class="round-badge">Rodada 1</span>
+            <button class="icon-btn" id="mute-btn" onclick="toggleSound()" aria-label="Ativar ou desativar som">🔊</button>
         </div>
+        <h2 id="game-theme">TEMA</h2>
+        <div id="word-count" class="word-count">Fale 1 palavra por vez</div>
+        <div class="timer-track"><div id="timer-bar"></div></div>
+        <div id="timer-label">10,0s</div>
+        <div id="letters"></div>
     </div>
-</div>
 
-<body class="bg-light">
-    <div class="container vh-100 d-flex justify-content-center align-items-center">
-        <div class="menu-container active text-center">
-            <h1 class="mb-1" style="font-family: 'LOVE-YOU'; font-size: 100px;" >TRAVA</h1>
-            <h1 class="mt-1 mb-3" style="font-family: 'LOVE-YOU'; font-size: 100px;" >LETRA</h1>
-            <button class="btn btn-primary btn-lg mt-2" onclick="selectTheme()">Jogar</button>
-            <a href="help.html" class="btn btn-secondary btn-lg mt-2">Como Jogar</a>
-        </div>
-        <div class="game-container text-center">
-            <h2 id="game-theme">Tema</h2>
-            <div id="timer" class="progress mt-2">
-                <div id="timer-bar" class="progress-bar bg-danger timer-bar" style="width: 100%;"></div>
+    <!-- ===== Modal: tema sorteado ===== -->
+    <div id="theme-modal" class="overlay">
+        <div class="dialog">
+            <h2>Tema sorteado 🎲</h2>
+            <div id="drawn-theme" class="big-theme"></div>
+            <div class="actions">
+                <button class="btn outline" onclick="drawTheme()">🔁 Sortear outro</button>
+                <button class="btn" onclick="startGame()">Começar!</button>
             </div>
-            <br class="d-none d-lg-block">
-            <div id="letters" class="d-flex flex-wrap justify-content-center mt-4">
-                <!-- Geração dinâmica de botões de letras -->
-            </div>
-            <button class="btn btn-link position-absolute top-0 start-0 m-3" onclick="backToMenu()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
-                    <path fill-rule="evenodd" d="M15 8a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 0 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 7.5H14.5A.5.5 0 0 1 15 8z"/>
-                </svg>
-            </button>
         </div>
     </div>
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+    <!-- ===== Modal: eliminado ===== -->
+    <div id="timeout-modal" class="overlay">
+        <div class="dialog eliminated">
+            <h2>⏰ Eliminado!</h2>
+            <p>O tempo acabou — o jogador da vez está fora. Os demais continuam com as letras restantes.</p>
+            <div class="actions">
+                <button class="btn outline" onclick="closeModal('timeout-modal'); backToMenu()">Menu</button>
+                <button class="btn outline" onclick="closeModal('timeout-modal'); drawTheme()">Novo tema</button>
+                <button class="btn" onclick="closeModal('timeout-modal'); resumeRound()">Continuar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Modal: nova rodada ===== -->
+    <div id="round-modal" class="overlay">
+        <div class="dialog">
+            <h2>🏆 Nova rodada!</h2>
+            <p id="round-text">Todas as letras foram usadas! Agora cada jogador deve falar <b>2 palavras</b> por vez.</p>
+            <div class="actions">
+                <button class="btn outline" onclick="closeModal('round-modal'); drawTheme()">Novo tema</button>
+                <button class="btn" onclick="closeModal('round-modal'); nextRound()">Vamos lá!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Modal: configurações ===== -->
+    <div id="settings-modal" class="overlay">
+        <div class="dialog">
+            <h2>⚙️ Opções</h2>
+            <div class="settings-row">
+                <span>Tempo por jogada</span>
+                <div class="seg" id="time-seg">
+                    <button data-t="5">5s</button>
+                    <button data-t="10">10s</button>
+                    <button data-t="15">15s</button>
+                    <button data-t="20">20s</button>
+                </div>
+            </div>
+            <div class="settings-row">
+                <span>Sons</span>
+                <label class="switch"><input type="checkbox" id="opt-sound"><span class="slider"></span></label>
+            </div>
+            <div class="settings-row">
+                <span>Vibração</span>
+                <label class="switch"><input type="checkbox" id="opt-vibrate"><span class="slider"></span></label>
+            </div>
+            <div class="settings-row">
+                <span>Letras difíceis (K, Q, W, X, Y, Z)</span>
+                <label class="switch"><input type="checkbox" id="opt-hard"><span class="slider"></span></label>
+            </div>
+            <br>
+            <div class="actions">
+                <button class="btn" onclick="closeSettings()">Pronto</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        'use strict';
 
-        let timer;
-        let tickingSound = new Audio('media/TICTAC.mp3');
-        let alarmSound = new Audio('media/ALARM.mp3');
-        let buttonSound = new Audio('media/BUTTON.mp3');
+        /* =================== Configurações =================== */
+        const DEFAULTS = { duration: 10, sound: true, vibrate: true, hardLetters: false };
+        let settings = { ...DEFAULTS };
+        try {
+            Object.assign(settings, JSON.parse(localStorage.getItem('tl-settings') || '{}'));
+        } catch (e) { /* localStorage indisponível */ }
+
+        function saveSettings() {
+            try { localStorage.setItem('tl-settings', JSON.stringify(settings)); } catch (e) {}
+        }
+
+        /* =================== Temas =================== */
+        const THEMES = [
+            'Animais', 'Animais Marinhos', 'Aves', 'Insetos e Répteis',
+            'Frutas', 'Legumes e Verduras', 'Alimentos', 'Comidas Típicas do Brasil',
+            'Doces e Sobremesas', 'Comidas de Festa', 'Bebidas', 'Coisas de Churrasco',
+            'Cores', 'Nomes de Pessoas', 'Nomes de Meninas', 'Nomes de Meninos',
+            'Apelidos Carinhosos', 'Sobrenomes',
+            'Países', 'Capitais do Mundo', 'Cidades do Brasil', 'Praias e Lugares Turísticos',
+            'Coisas de Praia', 'Coisas de Fazenda', 'Coisas de Escola', 'Coisas de Cozinha',
+            'Coisas de Banheiro', 'Partes de uma Casa', 'Objetos', 'Ferramentas',
+            'Profissões', 'Partes do Corpo', 'Esportes', 'Times de Futebol',
+            'Jogadores de Futebol', 'Natureza', 'Flores e Plantas', 'Árvores',
+            'Instrumentos Musicais', 'Estilos Musicais', 'Cantores e Bandas',
+            'Músicas Famosas', 'Meios de Transporte', 'Marcas Famosas',
+            'Marcas de Carro', 'Planetas e Estrelas', 'Filmes', 'Séries de TV',
+            'Desenhos Animados', 'Personagens de Desenho Animado', 'Personagens de Filme',
+            'Personagens de Videogame', 'Personagens de Livro', 'Heróis e Vilões',
+            'Livros e Autores', 'Tecnologia', 'Aplicativos e Redes Sociais',
+            'Youtubers e Influencers', 'História do Brasil', 'Personagens Históricos',
+            'Mitologia e Lendas', 'Lendas do Folclore Brasileiro', 'Festas e Celebrações',
+            'Coisas de Festa Junina', 'Coisas de Natal', 'Roupas e Acessórios',
+            'Calçados', 'Jóias e Pedras Preciosas', 'Sentimentos e Emoções',
+            'Qualidades de uma Pessoa', 'Defeitos de uma Pessoa', 'Hobbies e Passatempos',
+            'Brinquedos e Jogos', 'Jogos de Videogame', 'Doenças', 'Remédios e Saúde',
+            'Fenômenos da Natureza', 'Coisas Geladas', 'Coisas Quentes',
+            'Coisas Redondas', 'Coisas Pequenas', 'Coisas Gigantes',
+            'Coisas que Voam', 'Coisas que Têm Rodas', 'Coisas de Supermercado',
+            'Produtos de Limpeza', 'Materiais e Minerais', 'Tarefas Domésticas',
+            'Verbos (Ações)', 'Palavras em Inglês', 'Motivos para Chegar Atrasado',
+            'Desculpas Esfarrapadas', 'Coisas que Fazem Barulho', 'Coisas de Hospital',
+            'Coisas de Circo', 'Animais de Estimação', 'Raças de Cachorro',
+            'Super Poderes', 'Sabores de Sorvete', 'Sabores de Pizza', 'Presentes de Aniversário'
+        ];
+
+        let recentThemes = [];
+        try { recentThemes = JSON.parse(localStorage.getItem('tl-recent') || '[]'); } catch (e) {}
+
+        function pickTheme() {
+            const pool = THEMES.filter(t => !recentThemes.includes(t));
+            const list = pool.length ? pool : THEMES;
+            const theme = list[Math.floor(Math.random() * list.length)];
+            recentThemes.push(theme);
+            if (recentThemes.length > 15) recentThemes.shift();
+            try { localStorage.setItem('tl-recent', JSON.stringify(recentThemes)); } catch (e) {}
+            return theme;
+        }
+
+        /* =================== Sons =================== */
+        // Web Audio API: o contexto é criado/desbloqueado no primeiro toque do usuário
+        // (navegadores bloqueiam áudio antes de um gesto). Fallback para <audio> se
+        // fetch falhar (ex.: abertura via file://).
+        const SOUND_FILES = { tick: 'media/TICTAC.mp3', alarm: 'media/ALARM.mp3', button: 'media/BUTTON.mp3' };
+        let audioCtx = null;
+        const buffers = {};
+        const htmlAudio = {};
+        let useHtmlAudio = false;
+        let tickSource = null;
+        let htmlTickEl = null;
+
+        function initAudio() {
+            if (audioCtx || useHtmlAudio) {
+                if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+                return;
+            }
+            const Ctx = window.AudioContext || window.webkitAudioContext;
+            if (!Ctx || location.protocol === 'file:') { initHtmlAudio(); return; }
+            audioCtx = new Ctx();
+            for (const [name, url] of Object.entries(SOUND_FILES)) {
+                fetch(url)
+                    .then(r => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+                    .then(data => audioCtx.decodeAudioData(data))
+                    .then(buf => { buffers[name] = buf; })
+                    .catch(() => { initHtmlAudio(); });
+            }
+        }
+
+        function initHtmlAudio() {
+            if (useHtmlAudio) return;
+            useHtmlAudio = true;
+            for (const [name, url] of Object.entries(SOUND_FILES)) {
+                htmlAudio[name] = new Audio(url);
+                htmlAudio[name].preload = 'auto';
+            }
+        }
+
+        function playSound(name, { loop = false } = {}) {
+            if (!settings.sound) return null;
+            if (audioCtx && buffers[name]) {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const src = audioCtx.createBufferSource();
+                src.buffer = buffers[name];
+                src.loop = loop;
+                src.connect(audioCtx.destination);
+                src.start(0);
+                return src;
+            }
+            if (useHtmlAudio && htmlAudio[name]) {
+                const el = loop ? htmlAudio[name] : htmlAudio[name].cloneNode();
+                el.loop = loop;
+                el.currentTime = 0;
+                el.play().catch(() => {});
+                return el;
+            }
+            return null;
+        }
+
+        function startTick() {
+            stopTick();
+            const s = playSound('tick', { loop: true });
+            if (s instanceof Audio) htmlTickEl = s; else tickSource = s;
+        }
+
+        function stopTick() {
+            if (tickSource) { try { tickSource.stop(); } catch (e) {} tickSource = null; }
+            if (htmlTickEl) { htmlTickEl.pause(); htmlTickEl = null; }
+        }
+
+        // Desbloqueia o áudio no primeiro gesto em qualquer lugar da página
+        ['pointerdown', 'touchstart', 'keydown'].forEach(ev =>
+            document.addEventListener(ev, initAudio, { once: true, passive: true })
+        );
+
+        function toggleSound() {
+            settings.sound = !settings.sound;
+            saveSettings();
+            updateMuteBtn();
+            if (!settings.sound) stopTick();
+            else if (timerId) startTick();
+            const chk = document.getElementById('opt-sound');
+            if (chk) chk.checked = settings.sound;
+        }
+
+        function updateMuteBtn() {
+            document.getElementById('mute-btn').textContent = settings.sound ? '🔊' : '🔇';
+        }
+
+        function vibrate(pattern) {
+            if (settings.vibrate && navigator.vibrate) navigator.vibrate(pattern);
+        }
+
+        /* =================== Estado do jogo =================== */
+        const BASE_LETTERS = 'ABCDEFGHIJLMNOPRSTUV';
+        const HARD_LETTERS = 'KQWXYZ';
+        let currentTheme = '';
+        let round = 1;
+        let timerId = null;
+        let timeLeft = 0;
+
+        const $ = id => document.getElementById(id);
+
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            $(id).classList.add('active');
+        }
+
+        function openModal(id) { $(id).classList.add('open'); }
+        function closeModal(id) { $(id).classList.remove('open'); }
+
+        /* =================== Fluxo =================== */
+        function drawTheme() {
+            stopTimer();
+            currentTheme = pickTheme();
+            $('drawn-theme').textContent = currentTheme.toUpperCase();
+            openModal('theme-modal');
+        }
 
         function startGame() {
-            $('.menu-container').removeClass('active');
-            $('.game-container').addClass('active');
-            initializeGame();
-        }
-
-        function selectTheme() {
-            $('#gerarTema').modal('show');
-            
-            const themes = [
-                "Animais",
-                "Objetos",
-                "Alimentos",
-                "Cores",
-                "Nomes de Pessoas",
-                "Países e Capitais",
-                "Profissões",
-                "Partes do Corpo",
-                "Esportes",
-                "Natureza",
-                "Frutas",
-                "Legumes e Verduras",
-                "Instrumentos Musicais",
-                "Meios de Transporte",
-                "Flores",
-                "Cidades do Brasil",
-                "Marcas Famosas",
-                "Planetas e Estrelas",
-                "Filmes e Séries",
-                "Livros e Autores",
-                "Heróis e Vilões",
-                "Tecnologia",
-                "História e Personagens Históricos",
-                "Arte e Pintura",
-                "Monumentos e Construções Famosas",
-                "Festas e Celebrações",
-                "Roupas e Acessórios",
-                "Jóias e Pedras Preciosas",
-                "Veículos e Máquinas",
-                "Música e Cantores",
-                "Sentimentos e Emoções",
-                "Filosofia e Conceitos",
-                "Ciência e Experimentos",
-                "Desastres Naturais",
-                "Fenômenos Climáticos",
-                "Hobbies e Passatempos",
-                "Brinquedos e Jogos",
-                "Aves e Peixes",
-                "Insetos e Répteis",
-                "Comidas Típicas",
-                "Doenças e Saúde",
-                "Ferramentas e Equipamentos",
-                "Mitologia e Lendas",
-                "Armas e Equipamentos de Guerra",
-                "Religiões e Crenças",
-                "Educação e Aprendizado",
-                "Geografia e Mapas",
-                "Viagens e Destinos Turísticos",
-                "Valores e Virtudes",
-                "Linguagens e Dialetos",
-                "Figuras de Linguagem",
-                "Civilizações Antigas",
-                "Materiais e Minerais",
-                "Produtos de Limpeza",
-                "Doces e Sobremesas",
-                "Animais Marinhos",
-                "Partes de uma Casa",
-                "Números e Operações Matemáticas",
-                "Tarefas Domésticas",
-                "Comidas de Festa",
-                "Personagens de Desenhos Animados",
-                "Personagens de Videogames",
-                "Personagens de Livros",
-                "Personagens de Filmes"
-            ];
-
-            const randomTheme = themes[Math.floor(Math.random() * themes.length)];
-            $('#game-theme').text(randomTheme.toUpperCase());
-            $('#temaGeradoText').text(randomTheme.toUpperCase());
-        }
-
-        function backToMenu() {
-            tickingSound.pause();
-            alarmSound.pause();
-            $('.game-container').removeClass('active');
-            $('.menu-container').addClass('active');
-            resetGame();
-        }
-
-        function initializeGame() {
-            // Inicializa as letras e o cronômetro
-            const letters = 'ABCDEFGHIJLMNOPRSTUV'.split('');
-            $('#letters').empty();
-            letters.forEach(letter => {
-                $('#letters').append(`<button class="btn btn-primary letter-button" onclick="selectLetter(this)">${letter}</button>`);
-            });
+            closeModal('theme-modal');
+            round = 1;
+            $('game-theme').textContent = currentTheme.toUpperCase();
+            buildLetters();
+            updateRoundUI();
+            showScreen('game-screen');
+            updateMuteBtn();
+            requestWakeLock();
             startTimer();
         }
 
-        function resetGame() {
-            // Reseta o jogo para o estado inicial
-            tickingSound.pause();
-            alarmSound.pause();
-            $('#timer-bar').css('width', '100%');
-            clearTimeout(timer);
+        function buildLetters() {
+            const letters = (BASE_LETTERS + (settings.hardLetters ? HARD_LETTERS : ''))
+                .split('').sort();
+            const container = $('letters');
+            container.innerHTML = '';
+            letters.forEach(letter => {
+                const btn = document.createElement('button');
+                btn.className = 'letter-button';
+                btn.textContent = letter;
+                btn.addEventListener('click', () => selectLetter(btn));
+                container.appendChild(btn);
+            });
         }
 
+        function updateRoundUI() {
+            $('round-badge').textContent = 'Rodada ' + round;
+            $('word-count').textContent = round === 1
+                ? 'Fale 1 palavra por vez'
+                : `Fale ${round} palavras por vez`;
+        }
+
+        function selectLetter(btn) {
+            if (btn.disabled) return;
+            btn.disabled = true;
+            playSound('button');
+            vibrate(30);
+            const remaining = document.querySelectorAll('.letter-button:not(:disabled)').length;
+            if (remaining === 0) {
+                stopTimer();
+                setTimeout(() => {
+                    $('round-text').innerHTML =
+                        `Todas as letras foram usadas! Agora cada jogador deve falar <b>${round + 1} palavras</b> por vez.`;
+                    openModal('round-modal');
+                }, 300);
+            } else {
+                startTimer();
+            }
+        }
+
+        function nextRound() {
+            round++;
+            updateRoundUI();
+            document.querySelectorAll('.letter-button').forEach(b => { b.disabled = false; });
+            startTimer();
+        }
+
+        function resumeRound() {
+            // Continua a mesma rodada com as letras restantes
+            startTimer();
+        }
+
+        function backToMenu() {
+            stopTimer();
+            releaseWakeLock();
+            showScreen('menu-screen');
+        }
+
+        /* =================== Timer =================== */
         function startTimer() {
-            let width = 100;
-            tickingSound.loop = true;
-            tickingSound.play();
-            timer = setInterval(() => {
-                if (width <= 0) {
-                    clearInterval(timer);
-                    tickingSound.pause();
-                    alarmSound.play();
-                    setTimeout(() => {
-                        $('#timeoutText').text('O jogador da vez foi eliminado!');
-                        $('#bntContinuar').off('click');
-                        $('#timeoutModalLabel').text('ELIMINADO!');
-                        $('#timeoutModal').modal('show');
-                    }, 250);
-                } else {
-                    width--;
-                    $('#timer-bar').css('width', width + '%');
+            stopTimer();
+            const total = settings.duration * 1000;
+            const start = performance.now();
+            timeLeft = total;
+            setBar(100, total);
+            startTick();
+            timerId = setInterval(() => {
+                const elapsed = performance.now() - start;
+                timeLeft = Math.max(0, total - elapsed);
+                setBar((timeLeft / total) * 100, timeLeft);
+                if (timeLeft <= 0) {
+                    stopTimer();
+                    playSound('alarm');
+                    vibrate([200, 100, 200, 100, 400]);
+                    setTimeout(() => openModal('timeout-modal'), 350);
                 }
             }, 100);
         }
 
-        function checkAllLettersSelected() {
-            const allSelected = $('.letter-button').length === $('.letter-button:disabled').length;
-            if (allSelected) {
-                tickingSound.pause();
-                alarmSound.pause();
-                setTimeout(() => {
-                    $('#timeoutModal').modal('show');
-                    $('#timeoutText').text('Todas as letras foram selecionadas! A nova rodada vai começar. Agora, os jogadores devem falar uma palavras a mais');
-                    $('#bntContinuar').on('click', function() {
-                        $('#timeoutModal').modal('hide');
-                        startGame();
-                    });
-                    $('#timeoutModalLabel').text('Nova Rodada');
-                    stopTimer();
-                }, 250);
-            }
-        }
-
         function stopTimer() {
-            clearInterval(timer);
-            tickingSound.pause();
-            alarmSound.pause();
+            if (timerId) { clearInterval(timerId); timerId = null; }
+            stopTick();
         }
 
-        function selectLetter(button) {
-            $(button).prop('disabled', true).removeClass('btn-primary').addClass('btn-outline-primary');
-            clearInterval(timer);
-            buttonSound.play();
-            startTimer();
-            checkAllLettersSelected();
+        function setBar(pct, ms) {
+            const bar = $('timer-bar');
+            bar.style.width = pct + '%';
+            bar.classList.toggle('warn', pct <= 60 && pct > 30);
+            bar.classList.toggle('danger', pct <= 30);
+            $('timer-label').textContent = (ms / 1000).toFixed(1).replace('.', ',') + 's';
         }
+
+        /* =================== Configurações (UI) =================== */
+        function openSettings() {
+            $('opt-sound').checked = settings.sound;
+            $('opt-vibrate').checked = settings.vibrate;
+            $('opt-hard').checked = settings.hardLetters;
+            document.querySelectorAll('#time-seg button').forEach(b =>
+                b.classList.toggle('sel', Number(b.dataset.t) === settings.duration)
+            );
+            openModal('settings-modal');
+        }
+
+        function closeSettings() {
+            settings.sound = $('opt-sound').checked;
+            settings.vibrate = $('opt-vibrate').checked;
+            settings.hardLetters = $('opt-hard').checked;
+            saveSettings();
+            updateMuteBtn();
+            closeModal('settings-modal');
+        }
+
+        document.querySelectorAll('#time-seg button').forEach(b =>
+            b.addEventListener('click', () => {
+                settings.duration = Number(b.dataset.t);
+                saveSettings();
+                document.querySelectorAll('#time-seg button').forEach(x =>
+                    x.classList.toggle('sel', x === b));
+            })
+        );
+
+        // Tocar fora do modal fecha (e retoma o jogo, se houver partida em andamento)
+        $('theme-modal').addEventListener('click', e => {
+            if (e.target !== e.currentTarget) return;
+            closeModal('theme-modal');
+            if ($('game-screen').classList.contains('active')) resumeRound();
+        });
+
+        $('settings-modal').addEventListener('click', e => {
+            if (e.target === e.currentTarget) closeSettings();
+        });
+
+        /* =================== Wake Lock =================== */
+        // Mantém a tela ligada durante a partida
+        let wakeLock = null;
+
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen');
+            } catch (e) { /* não suportado ou negado */ }
+        }
+
+        function releaseWakeLock() {
+            if (wakeLock) { wakeLock.release().catch(() => {}); wakeLock = null; }
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                stopTick();
+            } else if ($('game-screen').classList.contains('active')) {
+                requestWakeLock();
+                if (timerId) startTick();
+            }
+        });
+
+        /* =================== PWA =================== */
+        if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+            window.addEventListener('load', () =>
+                navigator.serviceWorker.register('sw.js').catch(() => {})
+            );
+        }
+
+        let deferredInstall = null;
+        window.addEventListener('beforeinstallprompt', e => {
+            e.preventDefault();
+            deferredInstall = e;
+            $('install-btn').style.display = 'inline-block';
+        });
+
+        $('install-btn').addEventListener('click', async () => {
+            if (!deferredInstall) return;
+            deferredInstall.prompt();
+            await deferredInstall.userChoice;
+            deferredInstall = null;
+            $('install-btn').style.display = 'none';
+        });
+
+        window.addEventListener('appinstalled', () => {
+            $('install-btn').style.display = 'none';
+        });
     </script>
 </body>
 
